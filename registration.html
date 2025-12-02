@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Регистрация</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--tg-theme-text-color, #000000);
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: var(--tg-theme-hint-color, #999999);
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--tg-theme-text-color, #000000);
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 16px;
+            border: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+            border-radius: 12px;
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: var(--tg-theme-button-color, #3390ec);
+        }
+
+        .gender-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .gender-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid var(--tg-theme-hint-color, #e0e0e0);
+            border-radius: 12px;
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .gender-btn.active {
+            border-color: var(--tg-theme-button-color, #3390ec);
+            background-color: var(--tg-theme-button-color, #3390ec);
+            color: var(--tg-theme-button-text-color, #ffffff);
+        }
+
+        .interests-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .interest-tag {
+            padding: 8px 16px;
+            border: 2px solid var(--tg-theme-hint-color, #e0e0e0);
+            border-radius: 20px;
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .interest-tag.active {
+            border-color: var(--tg-theme-button-color, #3390ec);
+            background-color: var(--tg-theme-button-color, #3390ec);
+            color: var(--tg-theme-button-text-color, #ffffff);
+        }
+
+        .error {
+            color: #ff3b30;
+            font-size: 13px;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        .progress {
+            width: 100%;
+            height: 4px;
+            background-color: var(--tg-theme-hint-color, #e0e0e0);
+            border-radius: 2px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--tg-theme-button-color, #3390ec);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .hint {
+            font-size: 13px;
+            color: var(--tg-theme-hint-color, #999999);
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📝 Регистрация</h1>
+        <p class="subtitle">Заполни профиль, чтобы начать общение</p>
+
+        <div class="progress">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <form id="registrationForm">
+            <div class="form-group">
+                <label for="name">Как тебя зовут? *</label>
+                <input type="text" id="name" name="name" placeholder="Введи свое имя" required minlength="2" maxlength="50">
+                <div class="error" id="nameError">Имя должно быть от 2 до 50 символов</div>
+            </div>
+
+            <div class="form-group">
+                <label>Твой пол *</label>
+                <div class="gender-buttons">
+                    <button type="button" class="gender-btn" data-gender="male">
+                        👨 Мужской
+                    </button>
+                    <button type="button" class="gender-btn" data-gender="female">
+                        👩 Женский
+                    </button>
+                </div>
+                <div class="error" id="genderError">Выбери пол</div>
+            </div>
+
+            <div class="form-group">
+                <label for="age">Сколько тебе лет? *</label>
+                <input type="number" id="age" name="age" placeholder="Введи возраст" required min="13" max="100">
+                <div class="error" id="ageError">Возраст должен быть от 13 до 100 лет</div>
+            </div>
+
+            <div class="form-group">
+                <label for="city">Твой город *</label>
+                <input type="text" id="city" name="city" placeholder="Например: Москва" required minlength="2" maxlength="50">
+                <div class="error" id="cityError">Название города от 2 до 50 символов</div>
+            </div>
+
+            <div class="form-group">
+                <label>Выбери интересы (минимум 1) *</label>
+                <div class="interests-container" id="interestsContainer">
+                    <div class="interest-tag" data-interest="Музыка">🎵 Музыка</div>
+                    <div class="interest-tag" data-interest="Кино">🎬 Кино</div>
+                    <div class="interest-tag" data-interest="Спорт">⚽ Спорт</div>
+                    <div class="interest-tag" data-interest="Игры">🎮 Игры</div>
+                    <div class="interest-tag" data-interest="Путешествия">✈️ Путешествия</div>
+                    <div class="interest-tag" data-interest="Книги">📚 Книги</div>
+                    <div class="interest-tag" data-interest="Искусство">🎨 Искусство</div>
+                    <div class="interest-tag" data-interest="Технологии">💻 Технологии</div>
+                    <div class="interest-tag" data-interest="Природа">🌿 Природа</div>
+                    <div class="interest-tag" data-interest="Еда">🍕 Еда</div>
+                    <div class="interest-tag" data-interest="Мода">👗 Мода</div>
+                    <div class="interest-tag" data-interest="Фотография">📷 Фотография</div>
+                </div>
+                <div class="error" id="interestsError">Выбери хотя бы один интерес</div>
+                <div class="hint">Это поможет найти интересных собеседников</div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Инициализация Telegram WebApp
+        const tg = window.Telegram.WebApp;
+        
+        console.log('WebApp initialized:', tg);
+        console.log('WebApp version:', tg.version);
+        console.log('sendData available:', typeof tg.sendData);
+        
+        tg.expand();
+        tg.enableClosingConfirmation();
+
+        // Применяем тему Telegram
+        document.body.style.backgroundColor = tg.themeParams.bg_color || '#ffffff';
+
+        // Данные формы
+        let formData = {
+            name: '',
+            gender: '',
+            age: null,
+            city: '',
+            interests: []
+        };
+
+        // Обработка выбора пола
+        const genderButtons = document.querySelectorAll('.gender-btn');
+        genderButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                genderButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                formData.gender = btn.dataset.gender;
+                document.getElementById('genderError').classList.remove('show');
+                updateProgress();
+            });
+        });
+
+        // Обработка выбора интересов
+        const interestTags = document.querySelectorAll('.interest-tag');
+        interestTags.forEach(tag => {
+            tag.addEventListener('click', () => {
+                tag.classList.toggle('active');
+                const interest = tag.dataset.interest;
+                
+                if (tag.classList.contains('active')) {
+                    if (!formData.interests.includes(interest)) {
+                        formData.interests.push(interest);
+                    }
+                } else {
+                    formData.interests = formData.interests.filter(i => i !== interest);
+                }
+                
+                document.getElementById('interestsError').classList.remove('show');
+                updateProgress();
+            });
+        });
+
+        // Обработка ввода текста
+        const nameInput = document.getElementById('name');
+        const ageInput = document.getElementById('age');
+        const cityInput = document.getElementById('city');
+
+        nameInput.addEventListener('input', (e) => {
+            formData.name = e.target.value.trim();
+            document.getElementById('nameError').classList.remove('show');
+            updateProgress();
+        });
+
+        ageInput.addEventListener('input', (e) => {
+            formData.age = parseInt(e.target.value);
+            document.getElementById('ageError').classList.remove('show');
+            updateProgress();
+        });
+
+        cityInput.addEventListener('input', (e) => {
+            formData.city = e.target.value.trim();
+            document.getElementById('cityError').classList.remove('show');
+            updateProgress();
+        });
+
+        // Обновление прогресс-бара
+        function updateProgress() {
+            let completed = 0;
+            const total = 5;
+
+            if (formData.name.length >= 2) completed++;
+            if (formData.gender) completed++;
+            if (formData.age >= 13 && formData.age <= 100) completed++;
+            if (formData.city.length >= 2) completed++;
+            if (formData.interests.length > 0) completed++;
+
+            const progress = (completed / total) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+
+            // Включаем/выключаем кнопку отправки
+            if (completed === total) {
+                tg.MainButton.show();
+                tg.MainButton.enable();
+            } else {
+                tg.MainButton.disable();
+            }
+        }
+
+        // Валидация формы
+        function validateForm() {
+            let isValid = true;
+            let errors = [];
+
+            // Проверка имени
+            if (formData.name.length < 2 || formData.name.length > 50) {
+                document.getElementById('nameError').classList.add('show');
+                errors.push('имя');
+                isValid = false;
+            }
+
+            // Проверка пола
+            if (!formData.gender) {
+                document.getElementById('genderError').classList.add('show');
+                errors.push('пол');
+                isValid = false;
+            }
+
+            // Проверка возраста
+            if (!formData.age || formData.age < 13 || formData.age > 100) {
+                document.getElementById('ageError').classList.add('show');
+                errors.push('возраст');
+                isValid = false;
+            }
+
+            // Проверка города
+            if (formData.city.length < 2 || formData.city.length > 50) {
+                document.getElementById('cityError').classList.add('show');
+                errors.push('город');
+                isValid = false;
+            }
+
+            // Проверка интересов
+            if (formData.interests.length === 0) {
+                document.getElementById('interestsError').classList.add('show');
+                errors.push('интересы');
+                isValid = false;
+            }
+
+            if (!isValid) {
+                console.log('Validation failed:', errors);
+            } else {
+                console.log('Validation passed. Data:', formData);
+            }
+
+            return isValid;
+        }
+
+        // Настройка главной кнопки
+        tg.MainButton.text = 'Получить подарок 🎁';
+        tg.MainButton.color = tg.themeParams.button_color || '#3390ec';
+        tg.MainButton.textColor = tg.themeParams.button_text_color || '#ffffff';
+        tg.MainButton.disable();
+
+        // Обработка нажатия на главную кнопку
+        let isSubmitting = false;
+        
+        tg.MainButton.onClick(() => {
+            if (isSubmitting) return;
+            
+            console.log('Button clicked, form data:', formData);
+            
+            if (validateForm()) {
+                isSubmitting = true;
+                tg.MainButton.showProgress();
+                tg.MainButton.disable();
+                
+                console.log('Form is valid, attempting to send data...');
+                
+                try {
+                    const dataToSend = JSON.stringify(formData);
+                    console.log('Sending data:', formData);
+                    
+                    // Отправляем данные напрямую
+                    tg.sendData(dataToSend);
+                } catch (e) {
+                    console.error('Error sending data:', e);
+                    tg.MainButton.hideProgress();
+                    tg.MainButton.enable();
+                    isSubmitting = false;
+                    tg.showAlert('Ошибка отправки данных: ' + e.message);
+                }
+            } else {
+                tg.HapticFeedback.notificationOccurred('error');
+                
+                // Прокручиваем к первому полю с ошибкой
+                const firstError = document.querySelector('.error.show');
+                if (firstError) {
+                    firstError.parentElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        });
+
+        // Начальная инициализация
+        updateProgress();
+        tg.ready();
+    </script>
+</body>
+</html>
