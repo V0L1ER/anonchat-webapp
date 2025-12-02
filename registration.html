@@ -375,43 +375,15 @@
 
         // Обработка нажатия на главную кнопку        
         tg.MainButton.onClick(() => {
-            tg.MainButton.showProgress();
-            tg.MainButton.disable();
+            const dataToSend = JSON.stringify(formData);
             
-            // Собираем данные заново прямо перед отправкой
-            const currentData = {
-                name: document.getElementById('name').value.trim(),
-                gender: document.querySelector('.gender-btn.active')?.dataset.gender || '',
-                age: parseInt(document.getElementById('age').value) || 0,
-                city: document.getElementById('city').value.trim(),
-                interests: Array.from(document.querySelectorAll('.interest-tag.active')).map(tag => tag.dataset.interest)
-            };
-            
-            // Показываем что собрали
-            tg.showAlert('Данные:\n' + 
-                'Имя: ' + currentData.name + '\n' +
-                'Пол: ' + currentData.gender + '\n' +
-                'Возраст: ' + currentData.age + '\n' +
-                'Город: ' + currentData.city + '\n' +
-                'Интересы: ' + currentData.interests.length
-            );
-            
-            setTimeout(() => {
-                const dataToSend = JSON.stringify(currentData);
-                
-                try {
-                    tg.sendData(dataToSend);
-                    // Если через 1 секунду не закрылось - показываем сообщение
-                    setTimeout(() => {
-                        tg.showAlert('sendData вызван, но WebApp не закрылся.\n\nДанные должны быть отправлены боту.\nМожете закрыть WebApp вручную.');
-                        tg.MainButton.hideProgress();
-                    }, 1000);
-                } catch (e) {
-                    tg.MainButton.hideProgress();
-                    tg.MainButton.enable();
-                    tg.showAlert('ОШИБКА sendData: ' + e.message);
-                }
-            }, 1000);
+            try {
+                tg.sendData(dataToSend);
+            } catch (e) {
+                console.error('Ошибка sendData:', e);
+                tg.showAlert('Произошла ошибка. Попробуйте еще раз.');
+                tg.MainButton.enable();
+            }
         });
 
         // Начальная инициализация
