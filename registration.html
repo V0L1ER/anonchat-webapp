@@ -388,29 +388,47 @@
                 
                 console.log('Form is valid, attempting to send data...');
                 
-                try {
-                    const dataToSend = JSON.stringify(formData);
-                    console.log('=== SENDING DATA ===');
-                    console.log('Form data:', formData);
-                    console.log('JSON string:', dataToSend);
-                    console.log('JSON string length:', dataToSend.length);
-                    console.log('tg object:', tg);
-                    console.log('tg.sendData type:', typeof tg.sendData);
-                    
-                    // Отправляем данные напрямую
-                    console.log('Calling tg.sendData()...');
-                    const result = tg.sendData(dataToSend);
-                    console.log('tg.sendData() returned:', result);
-                    console.log('=== DATA SENT ===');
-                } catch (e) {
-                    console.error('=== ERROR ===');
-                    console.error('Error details:', e);
-                    console.error('Error message:', e.message);
-                    console.error('Error stack:', e.stack);
+                // Проверяем что sendData доступен
+                if (typeof tg.sendData !== 'function') {
                     tg.MainButton.hideProgress();
                     tg.MainButton.enable();
                     isSubmitting = false;
-                    tg.showAlert('Ошибка отправки: ' + e.message);
+                    tg.showAlert('Ошибка: sendData не доступен!\n\nВерсия WebApp: ' + (tg.version || 'unknown') + '\n\nПопробуйте обновить Telegram.');
+                    return;
+                }
+                
+                try {
+                    const dataToSend = JSON.stringify(formData);
+                    
+                    // Проверяем размер данных (лимит 4096 байт)
+                    if (dataToSend.length > 4096) {
+                        tg.MainButton.hideProgress();
+                        tg.MainButton.enable();
+                        isSubmitting = false;
+                        tg.showAlert('Ошибка: данные слишком большие (' + dataToSend.length + ' байт, лимит 4096)');
+                        return;
+                    }
+                    
+                    console.log('Sending data, length:', dataToSend.length);
+                    
+                    // Отправляем данные
+                    tg.sendData(dataToSend);
+                    
+                    // sendData не возвращает значение и не выбрасывает ошибку
+                    // WebApp должен закрыться автоматически
+                    
+                    // Если через 2 секунды не закрылся - показываем сообщение
+                    setTimeout(() => {
+                        tg.MainButton.hideProgress();
+                        tg.showAlert('Данные отправлены!\n\nЕсли WebApp не закрылся автоматически, закройте его вручную.');
+                    }, 2000);
+                    
+                } catch (e) {
+                    console.error('Error:', e);
+                    tg.MainButton.hideProgress();
+                    tg.MainButton.enable();
+                    isSubmitting = false;
+                    tg.showAlert('Ошибка: ' + e.message);
                 }
             } else {
                 tg.HapticFeedback.notificationOccurred('error');
