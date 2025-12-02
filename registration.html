@@ -390,16 +390,27 @@
                 
                 try {
                     const dataToSend = JSON.stringify(formData);
-                    console.log('Sending data:', formData);
+                    console.log('=== SENDING DATA ===');
+                    console.log('Form data:', formData);
+                    console.log('JSON string:', dataToSend);
+                    console.log('JSON string length:', dataToSend.length);
+                    console.log('tg object:', tg);
+                    console.log('tg.sendData type:', typeof tg.sendData);
                     
                     // Отправляем данные напрямую
-                    tg.sendData(dataToSend);
+                    console.log('Calling tg.sendData()...');
+                    const result = tg.sendData(dataToSend);
+                    console.log('tg.sendData() returned:', result);
+                    console.log('=== DATA SENT ===');
                 } catch (e) {
-                    console.error('Error sending data:', e);
+                    console.error('=== ERROR ===');
+                    console.error('Error details:', e);
+                    console.error('Error message:', e.message);
+                    console.error('Error stack:', e.stack);
                     tg.MainButton.hideProgress();
                     tg.MainButton.enable();
                     isSubmitting = false;
-                    tg.showAlert('Ошибка отправки данных: ' + e.message);
+                    tg.showAlert('Ошибка отправки: ' + e.message);
                 }
             } else {
                 tg.HapticFeedback.notificationOccurred('error');
