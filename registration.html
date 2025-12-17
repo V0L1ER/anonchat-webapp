@@ -185,8 +185,8 @@
 
             <div class="form-group">
                 <label for="age">Сколько тебе лет? *</label>
-                <input type="number" id="age" name="age" placeholder="Введи возраст" required min="13" max="100">
-                <div class="error" id="ageError">Возраст должен быть от 13 до 100 лет</div>
+                <input type="number" id="age" name="age" placeholder="Введи возраст" required min="1" max="120">
+                <div class="error" id="ageError">Возраст должен быть до 120 лет</div>
             </div>
 
             <div class="form-group">
@@ -302,7 +302,7 @@
 
             if (formData.name.length >= 2) completed++;
             if (formData.gender) completed++;
-            if (formData.age >= 13 && formData.age <= 100) completed++;
+            if (formData.age >= 1 && formData.age <= 120) completed++;
             if (formData.city.length >= 2) completed++;
             if (formData.interests.length > 0) completed++;
 
@@ -338,7 +338,7 @@
             }
 
             // Проверка возраста
-            if (!formData.age || formData.age < 13 || formData.age > 100) {
+            if (!formData.age || formData.age < 1 || formData.age > 120) {
                 document.getElementById('ageError').classList.add('show');
                 errors.push('возраст');
                 isValid = false;
